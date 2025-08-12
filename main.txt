@@ -1,0 +1,89 @@
+import telebot
+from telebot import types
+from telebot.apihelper import download_file
+
+bot = telebot.TeleBot(open('api.txt').read()) #Инициализация бота
+
+btn1 = types.KeyboardButton('Расписание') #создание кнопки
+btn2 = types.KeyboardButton('ДЗ')
+btn3 = types.KeyboardButton('Информация о школе')
+btn4 = types.KeyboardButton('Успеваемость')
+btn5 = types.KeyboardButton('Фото')
+
+markup = types.ReplyKeyboardMarkup(resize_keyboard=True)#сетка для кнопок
+markup.add(btn1,btn2,btn3,btn4,btn5)
+
+@bot.message_handler(commands=['start']) #определение реакции бота на /start
+def send_wecome(message): #функци реакции на /start
+    bot.reply_to(message, "Привет! Я учебный бот") #тело программы
+    bot.send_message(message.chat.id, "Выберите действие:",
+                     reply_markup=markup)
+
+@bot.message_handler(func=lambda message:True)
+def handle_buttons(message):
+    if message.text == 'Расписание':
+        ph = open('расписание занятий.jpeg', 'rb')
+        bot.send_photo(message.chat.id,ph,'Расписание')
+        url = 'https://schoolfiles.ru/print/shablony/raspisanie-urokov-among-us/attachment/01-among-us-raspisanie-urokov/'
+        bot.send_photo(message.chat.id, url, 'Расписание')
+
+        # bot.reply_to(message, "Понедельник: математика в 10:00")
+        # inline_markup = types.InlineKeyboardMarkup()  # создание "шаблона" для инлайн копки
+        # btn = types.InlineKeyboardButton(  # текст и ссылка для кнопки и её инициализация
+        #     text="Летние активности",
+        #     url="https://leto.mos.ru/"
+        # )
+        # inline_markup.add(btn)  # добавление кнопки в "шаблон" для инлайн кнопок
+        # bot.send_message(message.chat.id, "Лучше посмотри летние активности",
+        #             reply_markup=inline_markup)  # отправка сообщения пользователю с кнопкой
+
+    elif message.text == 'ДЗ':
+        doc = open('2323.pdf', 'rb')
+        bot.send_document(message.chat.id, doc, caption='ДЗ',visible_file_name='2323.pdf')
+
+        # bot.reply_to(message, ' вас каникулы, а все ДЗ у учителей')
+
+
+    elif message.text == 'Информация о школе':
+        bot.reply_to(message, "Привет! Помогу с информацией")  # тело программы
+        inline_markup = types.InlineKeyboardMarkup()  # создание "шаблона" для инлайн копки
+        btn = types.InlineKeyboardButton(  # текст и ссылка для кнопки и её инициализация
+
+            text="Информация о школе",
+            url="https://bmstu.ru//"
+        )
+        inline_markup.add(btn)  # добавление кнопки в "шаблон" для инлайн кнопок
+        bot.send_message(message.chat.id, "Вот сайт заведения",
+                           reply_markup=inline_markup)  #
+
+
+    elif message.text == 'Успеваемость':
+        bot.reply_to(message, "Вот журнал")  # тело программы
+
+
+
+
+    elif message.text == 'Фото':
+        ph = open('name_file.jpg', 'rb')
+        bot.send_photo(message.chat.id, ph, 'Загруженное фото')
+
+
+
+
+    elif str(message.text).lower() == 'привет':
+        bot.reply_to((message, 'Привет!'))
+
+@bot.message_handler(content_types=['photo'])
+def photoes(message):
+    file_id = message.photo[-1].file_id
+    file_info = bot.get_file(file_id)
+    download_file = bot.download_file(file_info.file_path)
+    with open('name_file.jpg', 'wb') as new_f:
+        new_f.write(download_file)
+    bot.reply_to(message, 'Фото сохранено')
+
+
+bot.infinity_polling() #отправка "настроек" в бот и его активация.
+# Без него бот неактивен
+
+
